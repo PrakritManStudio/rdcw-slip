@@ -1,0 +1,41 @@
+{
+  "name": "@prakrit_m/rdcw-slip",
+  "version": "1.0.0",
+  "description": "",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "license": "ISC",
+  "author": "Prakrit M. <prakritmanstudio@gmail.com>",
+  "scripts": {
+    "test": "ts-node example/test.ts",
+    "build": "tsup",
+    "build:run": "tsup && node dist/index.js",
+    "publish": "npm run build"
+  },
+  "keywords": [
+    "rdcw",
+    "qrslip",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PrakritManStudio/rdcw-slip.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PrakritManStudio/rdcw-slip/issues"
+  },
+  "homepage": "https://github.com/PrakritManStudio/rdcw-slip#readme",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+  }
+}
