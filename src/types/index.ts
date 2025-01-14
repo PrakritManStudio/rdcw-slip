@@ -18,7 +18,7 @@ export type BankCode =
   | "030" // GSB - ธนาคารออมสิน
   | "033"; // GHB - ธนาคารอาคารสงเคราะห์
 
-type ErrorCodes =
+export type ErrorCodes =
   | 0 // Invalid Data
   | 10001 // Invalid QR Payload
   | 10002 // This is not a Slip Verify API QR
@@ -59,29 +59,29 @@ export type Quota = {
   limit: number;
 };
 
-type Subscription = {
+export type Subscription = {
   id: string;
   postpaid: boolean;
 };
 
-type Proxy = {
+export type Proxy = {
   type: "NATID" | "MSISDN" | "EWALLETID" | "EMAIL" | "BILLERID" | null;
   value: string | null;
 };
 
-type Account = {
+export type Account = {
   type: "BANKAC" | "TOKEN" | "DUMMY" | "";
   value: string;
 };
 
-type Sender = {
+export type Sender = {
   displayName: string;
   name: string;
   proxy: Proxy;
   account: Account;
 };
 
-type Receiver = {
+export type Receiver = {
   displayName: string;
   name: string;
   proxy: Proxy;

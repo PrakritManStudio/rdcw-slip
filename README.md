@@ -1,18 +1,33 @@
 # 🚀 RDCW Slip SDK
 
-RdcwSlip SDK ช่วยให้คุณสามารถโต้ตอบกับ RDCW Slip API เพื่อเช็คโควต้าและสลิปได้
-
-![NPM Last Update](https://img.shields.io/npm/last-update/%40prakrit_m%2Frdcw-slip)
-[![NPM Downloads](https://img.shields.io/npm/dm/%40prakrit_m/rdcw-slip)](https://www.npmjs.org/package/@prakrit_m/rdcw-slip)
 [![NPM version](https://img.shields.io/npm/v/@prakrit_m/rdcw-slip.svg?style=flat)](https://www.npmjs.org/package/@prakrit_m/rdcw-slip)
+[![NPM Downloads](https://img.shields.io/npm/dm/%40prakrit_m/rdcw-slip)](https://www.npmjs.org/package/@prakrit_m/rdcw-slip)
+![NPM Last Update](https://img.shields.io/npm/last-update/%40prakrit_m%2Frdcw-slip)
+![Node Version](https://img.shields.io/node/v/@prakrit_m/rdcw-slip)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
-### ✨ Features
+SDK สำหรับตรวจสอบสลิปและโควต้าผ่าน RDCW Slip API อย่างง่ายดาย พร้อมรองรับ TypeScript แบบสมบูรณ์
 
-- รองรับ TypeScript
-- เช็คจำนวนโควต้าคงเหลือ (`checkQuota`)
-- เช็คสลิปด้วยข้อมูลต่างๆ (`checkSlip`)
+## 📋 สารบัญ
 
-## 📦 Installation
+- [คุณสมบัติ](#-คุณสมบัติ)
+- [การติดตั้ง](#-การติดตั้ง)
+- [การใช้งาน](#-การใช้งาน)
+- [API Reference](#-api-reference)
+- [Error Handling](#-error-handling)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## ✨ คุณสมบัติ
+
+- 🔄 ตรวจสอบสลิปและโควต้าแบบ Real-time
+- 📝 รองรับ TypeScript แบบสมบูรณ์
+- 🔒 ระบบจัดการ Error ที่ครอบคลุม
+- 🚀 Retry mechanism อัตโนมัติ
+- ⏱️ Timeout handling
+- 📊 Logging system
+
+## 📦 การติดตั้ง
 
 ```bash
 # npm
@@ -20,130 +35,136 @@ npm install @prakrit_m/rdcw-slip
 
 # yarn
 yarn add @prakrit_m/rdcw-slip
+
+# pnpm
+pnpm add @prakrit_m/rdcw-slip
 ```
 
-## 📖 Usage
+## 🚀 การใช้งาน
 
-### การนำเข้า SDK
+### การเริ่มต้นใช้งาน
 
 ```typescript
 import RdcwSlip from "@prakrit_m/rdcw-slip";
+
+// สร้าง instance แบบพื้นฐาน
+const rdcwSlip = new RdcwSlip("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET");
+
+// หรือกำหนด config เพิ่มเติม
+const rdcwSlip = new RdcwSlip("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET", {
+  timeout: 5000,
+  retries: 2,
+  logger: console
+});
 ```
 
-### 🏗️ การสร้างอินสแตนซ์
+### ตรวจสอบโควต้า
 
 ```typescript
-const rdcwSlip = new RdcwSlip("your-client-id", "your-client-secret");
-```
-
-### ⚙️ เมธอด
-
-#### `checkQuota()`
-
-เช็คจำนวนโควต้าคงเหลือ
-
-```typescript
-const quotaResponse = await rdcwSlip.checkQuota();
-if (quotaResponse.success) {
-  console.log("ข้อมูลโควต้า:", quotaResponse.quota);
-} else {
-  console.error(
-    "รหัสข้อผิดพลาด:",
-    quotaResponse.code,
-    "ข้อความ:",
-    quotaResponse.message
-  );
+try {
+  const response = await rdcwSlip.checkQuota();
+  if (response.success) {
+    console.log("โควต้าคงเหลือ:", response.quota.limit - response.quota.usage);
+  } else {
+    console.error("เกิดข้อผิดพลาด:", response.message);
+  }
+} catch (error) {
+  console.error("เกิดข้อผิดพลาดในการเชื่อมต่อ:", error);
 }
 ```
 
-**Return Type:**
-
-- `Promise<QuotaResponseSuccess | QuotaResponseError>`
-
-##### `QuotaResponseSuccess`:
+### ตรวจสอบสลิป
 
 ```typescript
-type QuotaResponseSuccess = {
-  success: true;
-  quota: Quota;
-};
-```
-
-##### `QuotaResponseError`:
-
-```typescript
-type QuotaResponseError = {
-  success: false;
-  code: ErrorCodes;
-  message: string;
-};
-```
-
-#### **`checkSlip(payload: string)`**
-
-เช็คสลิปด้วยข้อมูลใน qr code
-
-```typescript
-const payload = "your-payload-string";
-const slipResponse = await rdcwSlip.checkSlip(payload);
-if (slipResponse.success) {
-  console.log("ข้อมูลสลิป:", slipResponse.data);
-} else {
-  console.error(
-    "รหัสข้อผิดพลาด:",
-    slipResponse.code,
-    "ข้อความ:",
-    slipResponse.message
-  );
+try {
+  const response = await rdcwSlip.checkSlip("QR_PAYLOAD_HERE");
+  if (response.success) {
+    console.log("ข้อมูลการโอน:", {
+      จำนวนเงิน: response.data.data.amount, // หน่วยสตางค์
+      วันที่โอน: response.data.data.transDate, // เช่น "20230708"
+      เวลาที่โอน: response.data.data.transTime, // เช่น "12:51:57"
+      ธนาคารผู้โอน: response.data.data.sendingBank, // รหัสธนาคาร
+      ชื่อผู้โอน: response.data.data.sender.name // ชื่อบัญชีภาษาอังกฤษ
+    });
+  } else {
+    console.error("เกิดข้อผิดพลาด:", response.message);
+  }
+} catch (error) {
+  console.error("เกิดข้อผิดพลาดในการเชื่อมต่อ:", error);
 }
 ```
 
-**Return Type:**
+## 📚 API Reference
 
-- `Promise<SlipResponseSuccess | SlipResponseError>`
+### RdcwSlip
 
-##### `SlipResponseSuccess`:
-
-```typescript
-type SlipResponseSuccess = {
-  success: true;
-  discriminator: string;
-  valid: boolean;
-  data: Data1;
-  quota: Quota;
-  subscription: Subscription;
-  isCached: boolean;
-};
-```
-
-##### `SlipResponseError`:
+#### Constructor Options
 
 ```typescript
-type SlipResponseError = {
-  success: false;
-  code: ErrorCodes;
-  message: string;
-};
+interface RdcwSlipConfig {
+  baseUrl?: string;      // URL ของ API (default: https://suba.rdcw.co.th/v1/inquiry)
+  testPayload?: string;  // ข้อมูล qrCode ทดสอบ สำหรับดึง Quota
+  timeout?: number;      // ระยะเวลา timeout (default: 10000ms)
+  retries?: number;      // จำนวนครั้งที่จะ retry (default: 2)
+  logger?: Logger;       // ระบบ logging
+}
 ```
 
-## 🛠 Error Codes
+#### Methods
 
-| Code         | Description                                        | คำอธิบาย                                                                     |
-| ------------ | -------------------------------------------------- | ---------------------------------------------------------------------------- |
-| 0            | Invalid Data                                       | การเรียกข้อมูลไม่ได้แนบ Payload หรือแนบ Payload ผ่านรูปแบบอื่นที่ไม่ใช่ JSON |
-| 10001        | Invalid QR Payload                                 | Payload ที่แนบมาไม่ถูกต้อง มีลิ้งค์หรือข้อความอื่นปะปนมา                     |
-| 10002        | This is not a Slip Verify API QR                   | Payload ที่แนบมาไม่ใช่จากสลิปการทำรายการผ่าน Mobile Banking                  |
-| 20001, 20002 | Unable to connect to Bank API at this moment       | ไม่สามารถทำรายการกับทางธนาคารได้                                             |
-| 21001        | Please renew your subscription before using API    | Subscription หมดอายุหรือใช้เต็มโควต้าแล้ว                                    |
-| 40000        | Your IP address are not allowed to access this API | ไอพีของคุณไม่ตรงกับที่ได้กรอกไว้ใน Application                               |
+| Method | Description | Parameters | Return Type |
+|--------|-------------|------------|-------------|
+| `checkQuota()` | ตรวจสอบโควต้าคงเหลือ | - | `Promise<QuotaResponseSuccess \| QuotaResponseError>` |
+| `checkSlip(payload)` | ตรวจสอบสลิป | `payload: string` | `Promise<SlipResponseSuccess \| SlipResponseError>` |
 
-## 📚 Documentation
+## 🚨 Error Handling
 
-อ่าน RDCW Slip API Documentation ได้ที่ [RDCW Slip API Documentation](https://slip.rdcw.co.th/)
+### Error Codes
+
+| Code | Description | คำอธิบาย |
+|------|-------------|----------|
+| 0 | Invalid Data | การเรียกข้อมูลไม่ได้แนบ Payload หรือแนบ Payload ผ่านรูปแบบอื่น |
+| 10001 | Invalid QR Payload | Payload ที่แนบมาไม่ถูกต้อง |
+| 10002 | Not a Slip Verify API QR | Payload ไม่ใช่จากสลิป Mobile Banking |
+| 20001, 20002 | Bank API Connection Error | ไม่สามารถเชื่อมต่อกับธนาคารได้ |
+| 21001 | Subscription Required | Subscription หมดอายุหรือใช้เต็มโควต้า |
+| 40000 | IP Not Allowed | IP ไม่ตรงกับที่ลงทะเบียน |
+
+### การจัดการ Error
+
+```typescript
+try {
+  const response = await rdcwSlip.checkSlip(payload);
+  // handle success
+} catch (error) {
+  if (error instanceof RdcwSlipError) {
+    switch (error.code) {
+      case RdcwErrorCode.INVALID_CLIENT:
+        // handle invalid credentials
+        break;
+      case RdcwErrorCode.NETWORK_ERROR:
+        // handle network issues
+        break;
+    }
+  }
+}
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
 > This is a third-party SDK, not an official RDCW Slip SDK.  
 > SDK นี้พัฒนาโดยบุคคลภายนอก ไม่ใช่ผลิตภัณฑ์อย่างเป็นทางการจาก RDCW Slip
 
-[ISC](LICENSE)
+Licensed under [ISC](LICENSE)
+
+## 📚 เอกสารเพิ่มเติม
+
+สำหรับข้อมูลเพิ่มเติมเกี่ยวกับ API สามารถอ่านได้ที่ [RDCW Slip API Documentation](https://slip.rdcw.co.th/)

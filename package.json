@@ -1,6 +1,6 @@
 {
   "name": "@prakrit_m/rdcw-slip",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "",
   "private": false,
   "type": "module",
@@ -13,14 +13,20 @@
   "license": "ISC",
   "author": "Prakrit M. <prakritmanstudio@gmail.com>",
   "scripts": {
-    "test": "ts-node example/test.ts",
     "build": "tsup",
     "build:run": "tsup && node dist/index.js",
-    "publish": "npm run build"
+    "publish": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run integration",
+    "test:integration:watch": "vitest integration"
   },
   "keywords": [
     "rdcw",
     "qrslip",
+    "SlipVerify",
+    "SlipVerification",
     "typescript"
   ],
   "repository": {
@@ -32,9 +38,15 @@
   },
   "homepage": "https://github.com/PrakritManStudio/rdcw-slip#readme",
   "devDependencies": {
+    "@types/node": "^22.10.6",
+    "@vitest/coverage-v8": "^2.1.8",
     "ts-node": "^10.9.2",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
