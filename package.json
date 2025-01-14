@@ -1,6 +1,6 @@
 {
   "name": "@prakrit_m/rdcw-slip",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "ไลบรารีสำหรับตรวจสอบสลิปโอนเงินผ่าน RDCW Slip API - A TypeScript library for verifying Thai bank transfer slips using RDCW Slip API",
   "private": false,
   "type": "module",

@@ -42,8 +42,7 @@ pnpm add @prakrit_m/rdcw-slip
 
 ## 🚀 การใช้งาน
 
-![Static Badge](https://img.shields.io/badge/Github-View_Examples-brightgreen?style=for-the-badge&logo=github&link=https%3A%2F%2Fgithub.com%2FPrakritManStudio%2Frdcw-slip%2Ftree%2Fmain%2Fexamples)
-
+[![Github Examples](https://img.shields.io/badge/Github-View_Examples-brightgreen?style=flat-square&logo=github)](https://github.com/PrakritManStudio/rdcw-slip/tree/main/examples)
 
 ### การเริ่มต้นใช้งาน
 
@@ -57,7 +56,7 @@ const rdcwSlip = new RdcwSlip("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET");
 const rdcwSlip = new RdcwSlip("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET", {
   timeout: 5000,
   retries: 2,
-  logger: console
+  logger: console,
 });
 ```
 
@@ -87,7 +86,7 @@ try {
       วันที่โอน: response.data.data.transDate, // เช่น "20230708"
       เวลาที่โอน: response.data.data.transTime, // เช่น "12:51:57"
       ธนาคารผู้โอน: response.data.data.sendingBank, // รหัสธนาคาร
-      ชื่อผู้โอน: response.data.data.sender.name // ชื่อบัญชีภาษาอังกฤษ
+      ชื่อผู้โอน: response.data.data.sender.name, // ชื่อบัญชีภาษาอังกฤษ
     });
   } else {
     console.error("เกิดข้อผิดพลาด:", response.message);
@@ -111,61 +110,97 @@ try {
 
 ```typescript
 interface RdcwSlipConfig {
-  baseUrl?: string;      // URL ของ API (default: https://suba.rdcw.co.th/v1/inquiry)
-  testPayload?: string;  // ข้อมูล qrCode ทดสอบ สำหรับดึง Quota
-  timeout?: number;      // ระยะเวลา timeout (default: 10000ms)
-  retries?: number;      // จำนวนครั้งที่จะ retry (default: 2)
-  logger?: Logger;       // ระบบ logging
+  baseUrl?: string; // URL ของ API (default: https://suba.rdcw.co.th/v1/inquiry)
+  testPayload?: string; // ข้อมูล qrCode ทดสอบ สำหรับดึง Quota
+  timeout?: number; // ระยะเวลา timeout (default: 10000ms)
+  retries?: number; // จำนวนครั้งที่จะ retry (default: 2)
+  logger?: Logger; // ระบบ logging
 }
 ```
 
 #### Methods
 
-| Method | Description | Parameters | Return Type |
-|--------|-------------|------------|-------------|
-| `checkQuota()` | ตรวจสอบโควต้าคงเหลือ | - | `Promise<QuotaResponseSuccess \| QuotaResponseError>` |
-| `checkSlip(payload)` | ตรวจสอบสลิป | `payload: string` | `Promise<SlipResponseSuccess \| SlipResponseError>` |
+| Method               | Description          | Parameters        | Return Type                                           |
+| -------------------- | -------------------- | ----------------- | ----------------------------------------------------- |
+| `checkQuota()`       | ตรวจสอบโควต้าคงเหลือ | -                 | `Promise<QuotaResponseSuccess \| QuotaResponseError>` |
+| `checkSlip(payload)` | ตรวจสอบสลิป          | `payload: string` | `Promise<SlipResponseSuccess \| SlipResponseError>`   |
 
 ## 🚨 Error Handling
 
-### Error Codes
-
-| Code | Description | คำอธิบาย |
-|------|-------------|----------|
-| 0 | Invalid Data | การเรียกข้อมูลไม่ได้แนบ Payload หรือแนบ Payload ผ่านรูปแบบอื่น |
-| 10001 | Invalid QR Payload | Payload ที่แนบมาไม่ถูกต้อง |
-| 10002 | Not a Slip Verify API QR | Payload ไม่ใช่จากสลิป Mobile Banking |
-| 20001, 20002 | Bank API Connection Error | ไม่สามารถเชื่อมต่อกับธนาคารได้ |
-| 21001 | Subscription Required | Subscription หมดอายุหรือใช้เต็มโควต้า |
-| 40000 | IP Not Allowed | IP ไม่ตรงกับที่ลงทะเบียน |
-
-### การจัดการ Error
+### ตัวอย่างการจัดการข้อผิดพลาดเบื้องต้น
 
 ```typescript
+import RdcwSlip, { RdcwSlipError, RdcwErrorCode } from "@prakrit_m/rdcw-slip";
+
+const slip = new RdcwSlip("YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET");
+
 try {
-  const response = await rdcwSlip.checkSlip(payload);
-  // handle success
+  const result = await slip.checkSlip("QR_PAYLOAD");
+
+  // จัดการ Error จาก API Response
+  if (!result.success) {
+    switch (result.code) {
+      case 10001: // Invalid QR Payload
+        console.error("QR Code ไม่ถูกต้อง");
+        break;
+      case 10002: // Not a Slip Verify API QR
+        console.error("QR Code นี้ไม่ใช่ QR สำหรับตรวจสอบสลิป");
+        break;
+      case 21001: // Subscription Required
+        console.error("กรุณาต่ออายุ subscription");
+        break;
+      case 40000: // IP Not Allowed
+        console.error("IP ของคุณไม่ได้รับอนุญาตให้เข้าถึง API");
+        break;
+    }
+    return;
+  }
+
+  // จัดการกรณีสำเร็จ
+  console.log("ข้อมูลการโอน:", result.data);
 } catch (error) {
+  // จัดการ Error จาก SDK
   if (error instanceof RdcwSlipError) {
     switch (error.code) {
       case RdcwErrorCode.INVALID_CLIENT:
-        // handle invalid credentials
+        console.error("ข้อมูล Client ID หรือ Client Secret ไม่ถูกต้อง");
         break;
       case RdcwErrorCode.NETWORK_ERROR:
-        // handle network issues
+        console.error("เกิดปัญหาในการเชื่อมต่อเครือข่าย");
         break;
     }
   }
 }
 ```
 
-## 🤝 Contributing
+### รหัสข้อผิดพลาด (Error Codes)
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+| รหัส         | คำอธิบาย                            | การแก้ไข                           |
+| ------------ | ----------------------------------- | ---------------------------------- |
+| 10001        | QR Code ไม่ถูกต้อง                  | ตรวจสอบความถูกต้องของ QR Code      |
+| 10002        | ไม่ใช่ QR สำหรับตรวจสอบสลิป         | ใช้ QR Code จากสลิปโอนเงินเท่านั้น |
+| 20001, 20002 | ไม่สามารถเชื่อมต่อกับ API ของธนาคาร | ลองใหม่ภายหลัง                     |
+| 21001        | Subscription หมดอายุ/เต็มโควต้า     | ต่ออายุ subscription               |
+| 40000        | IP ไม่ได้รับอนุญาต                  | ตรวจสอบ IP ที่ลงทะเบียน            |
+
+### SDK Error Codes
+
+| รหัส           | คำอธิบาย                   | การแก้ไข                        |
+| -------------- | -------------------------- | ------------------------------- |
+| INVALID_CLIENT | ข้อมูล Client ไม่ถูกต้อง   | ตรวจสอบ Client ID และ Secret    |
+| NETWORK_ERROR  | ปัญหาการเชื่อมต่อเครือข่าย | ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต |
+
+สำหรับตัวอย่างการจัดการข้อผิดพลาดแบบละเอียดเพิ่มเติม สามารถดูได้ที่ [Error Handling Example](https://github.com/PrakritManStudio/rdcw-slip/blob/main/examples/error-handling.ts)
+
+## 🤝 การมีส่วนร่วมในการพัฒนา
+
+1. Fork โปรเจกต์
+2. สร้าง branch สำหรับฟีเจอร์ของคุณ (`git checkout -b feature/amazing-feature`)
+3. Commit การเปลี่ยนแปลง (`git commit -m 'เพิ่มฟีเจอร์ใหม่'`)
+4. Push ไปยัง branch (`git push origin feature/amazing-feature`)
+5. เปิด Pull Request
+
+สำหรับการรายงานปัญหาหรือข้อเสนอแนะ สามารถเปิด [Issue](https://github.com/PrakritManStudio/rdcw-slip/issues) ได้
 
 ## 📄 License
 
