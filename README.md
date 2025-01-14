@@ -42,6 +42,9 @@ pnpm add @prakrit_m/rdcw-slip
 
 ## 🚀 การใช้งาน
 
+![Static Badge](https://img.shields.io/badge/Github-View_Examples-brightgreen?style=for-the-badge&logo=github&link=https%3A%2F%2Fgithub.com%2FPrakritManStudio%2Frdcw-slip%2Ftree%2Fmain%2Fexamples)
+
+
 ### การเริ่มต้นใช้งาน
 
 ```typescript
@@ -93,6 +96,12 @@ try {
   console.error("เกิดข้อผิดพลาดในการเชื่อมต่อ:", error);
 }
 ```
+
+### ตัวอย่างการใช้งานเพิ่มเติม
+
+- [Basic Usage](https://github.com/PrakritManStudio/rdcw-slip/blob/main/examples/basic-usage.ts) - ตัวอย่างการใช้งานพื้นฐาน
+- [Advanced Usage](https://github.com/PrakritManStudio/rdcw-slip/blob/main/examples/advanced-usage.ts) - ตัวอย่างการใช้งานขั้นสูง
+- [Error Handling](https://github.com/PrakritManStudio/rdcw-slip/blob/main/examples/error-handling.ts) - ตัวอย่างการจัดการข้อผิดพลาด
 
 ## 📚 API Reference
 
